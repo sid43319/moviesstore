@@ -64,16 +64,20 @@ def delete_review(request, id, review_id):
 
 @login_required
 def report_review(request, id, review_id):
-    review = get_object_or_404(Review, id=review_id, user=request.user)
+    review = get_object_or_404(Review, id=review_id, movie_id = id)
+
+    if request.user == review.user:
+       return redirect('movies.show', id=id)
+    
     if request.method == 'GET':
         template_data = {}
         template_data['title'] = 'Report Review'
         template_data['review'] = review
         return render(request, 'movies/report_review.html', {'template_data': template_data})
-    elif request.method == 'POST' and request.POST['comment'] != '':
+    elif request.method == 'POST':
         movie = Movie.objects.get(id=id)
         report = Report()
-        report.comment = request.POST['comment']
+        report.comment = review.comment
         report.movie = movie
         report.user = request.user
         report.save()
